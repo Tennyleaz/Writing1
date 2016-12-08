@@ -1,6 +1,0 @@
-﻿  WinEvents.cpp
-d:\vsprojects\writing1\writing1\winevents.cpp(242): warning C4018: '<': signed/unsigned 不相符
-d:\vsprojects\writing1\writing1\winevents.cpp(257): warning C4018: '<': signed/unsigned 不相符
-d:\vsprojects\writing1\writing1\winevents.cpp(527): warning C4800: 'BOOL': 強制將 bool 的值定為 'true' 或 'false' (效能警告)
-  Writing1.vcxproj -> D:\VSProjects\Writing1\Debug\Writing1.exe
-  Writing1.vcxproj -> D:\VSProjects\Writing1\Debug\Writing1.pdb (Full PDB)

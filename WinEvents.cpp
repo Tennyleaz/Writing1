@@ -32,7 +32,8 @@ static json J;
 static list<stroke> strokes;
 static stroke newStroke;
 static WCHAR candidates[6];
-static HFONT buttonFont;
+//static HFONT buttonFont;
+static HPEN hpen;
 
 static CreateServiceFunc MyCreateService;
 static DestroyServiceFunc MyDestroyService;
@@ -46,6 +47,7 @@ static GetStrokeCount MyGetStrokeCount;
 
 LRESULT WM_CloseEvent(Parameter& param)
 {
+	DeleteObject(hpen);
 	Clean(param.hWnd_);
 	//DeleteObject(buttonFont);
 	MyClearStrokes(serviceID);
@@ -142,6 +144,9 @@ LRESULT WM_CreateEvent(Parameter& param)
 	//set the font
 	SendMessage(Globals::var().myButton[0], WM_SETFONT, (WPARAM)buttonFont, (LPARAM)MAKELONG(TRUE, 0));*/
 
+	//my pen
+	hpen = CreatePen(PS_SOLID, 2, RGB(0, 0, 0));	
+
 	// Create a normal DC and a memory DC for the entire 
 	// screen. The normal DC provides a snapshot of the 
 	// screen contents. The memory DC keeps a copy of this 
@@ -216,7 +221,7 @@ LRESULT WM_PaintEvent(Parameter& param)
 	HDC memoryDC = CreateCompatibleDC(hdc);
 	hBmp = CreateCompatibleBitmap(hdc, clientRec.right, clientRec.bottom);  // Create a bitmap big enough for our client rectangle.
 
-																			// Select the bitmap into the off-screen DC.
+	// Select the bitmap into the off-screen DC.
 	SelectObject(memoryDC, hBmp);
 
 	// Erase the background.
@@ -233,11 +238,14 @@ LRESULT WM_PaintEvent(Parameter& param)
 		//this help when I click on buttons
 		int exstyle = GetWindowLong(param.hWnd_, GWL_EXSTYLE);
 		exstyle |= WS_EX_NOACTIVATE;
-		SetWindowLong(param.hWnd_, GWL_EXSTYLE, exstyle);
+		SetWindowLong(param.hWnd_, GWL_EXSTYLE, exstyle);		
 	}
 
 	// TODO: 在此加入任何使用 hdc 的繪圖程式碼...
 	//---------------------------------------------------------------
+
+	//select my custom pen
+	SelectObject(memoryDC, hpen);
 
 	//draw the newStroke
 	if (newStroke.points.size() > 0)
@@ -314,9 +322,9 @@ LRESULT WM_PaintEvent(Parameter& param)
 		JUMP_POINT:*/
 
 		string s = "stroke count=" + to_string(strokeCount);
-		TextOutA(memoryDC, 55, 130, s.c_str(), s.size());
+		TextOutA(memoryDC, 10, 390, s.c_str(), s.size());
 
-		for (int i = 0; i < 6; i++)
+		/*for (int i = 0; i < 6; i++)
 		{
 			if(candidates[i] == '\0')
 				continue;
@@ -327,7 +335,7 @@ LRESULT WM_PaintEvent(Parameter& param)
 			//wstring ws(warray);
 			TextOut(memoryDC, 100 + i*25, 100, warray, 1);
 			TextOut(memoryDC, 55, 100, L"候選:", 3);
-		}
+		}*/
 	}
 	//---------------------------------------------------------------
 	// Blt the changes to the screen DC.

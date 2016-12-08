@@ -55,14 +55,14 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         return FALSE;
     }
 
-	Globals::var().clearButton = CreateWindow(L"BUTTON", L"Clean", WS_VISIBLE | WS_CHILD | BS_BOTTOM | WS_CLIPCHILDREN | WS_CLIPSIBLINGS, 5, 0, 60, 25, Globals::var().hWndFather, (HMENU)120, Globals::var().hInst, NULL);
+	Globals::var().clearButton = CreateWindow(L"BUTTON", L"Clean", WS_VISIBLE | WS_CHILD | BS_BOTTOM | WS_CLIPCHILDREN | WS_CLIPSIBLINGS, 5, 0, 80, 25, Globals::var().hWndFather, (HMENU)120, Globals::var().hInst, NULL);
 
-	Globals::var().myButton[0] = CreateWindow(L"BUTTON", L" ", WS_VISIBLE | WS_CHILD | BS_BOTTOM | WS_CLIPCHILDREN | WS_CLIPSIBLINGS, 80, 0, 50, 25, Globals::var().hWndFather, (HMENU)121, Globals::var().hInst, NULL);
-	Globals::var().myButton[1] = CreateWindow(L"BUTTON", L"", WS_VISIBLE | WS_CHILD | BS_BOTTOM | WS_CLIPCHILDREN | WS_CLIPSIBLINGS, 135, 0, 50, 25, Globals::var().hWndFather, (HMENU)122, Globals::var().hInst, NULL);
-	Globals::var().myButton[2] = CreateWindow(L"BUTTON", L"", WS_VISIBLE | WS_CHILD | BS_BOTTOM | WS_CLIPCHILDREN | WS_CLIPSIBLINGS, 190, 0, 50, 25, Globals::var().hWndFather, (HMENU)123, Globals::var().hInst, NULL);
-	Globals::var().myButton[3] = CreateWindow(L"BUTTON", L"", WS_VISIBLE | WS_CHILD | BS_BOTTOM | WS_CLIPCHILDREN | WS_CLIPSIBLINGS, 245, 0, 50, 25, Globals::var().hWndFather, (HMENU)124, Globals::var().hInst, NULL);
-	Globals::var().myButton[4] = CreateWindow(L"BUTTON", L"", WS_VISIBLE | WS_CHILD | BS_BOTTOM | WS_CLIPCHILDREN | WS_CLIPSIBLINGS, 300, 0, 50, 25, Globals::var().hWndFather, (HMENU)125, Globals::var().hInst, NULL);
-	Globals::var().myButton[5] = CreateWindow(L"BUTTON", L"", WS_VISIBLE | WS_CHILD | BS_BOTTOM | WS_CLIPCHILDREN | WS_CLIPSIBLINGS, 355, 0, 50, 25, Globals::var().hWndFather, (HMENU)126, Globals::var().hInst, NULL);
+	Globals::var().myButton[0] = CreateWindow(L"BUTTON", L" ", WS_VISIBLE | WS_CHILD | BS_BOTTOM | WS_CLIPCHILDREN | WS_CLIPSIBLINGS, 95, 0, 50, 25, Globals::var().hWndFather, (HMENU)121, Globals::var().hInst, NULL);
+	Globals::var().myButton[1] = CreateWindow(L"BUTTON", L"", WS_VISIBLE | WS_CHILD | BS_BOTTOM | WS_CLIPCHILDREN | WS_CLIPSIBLINGS, 150, 0, 50, 25, Globals::var().hWndFather, (HMENU)122, Globals::var().hInst, NULL);
+	Globals::var().myButton[2] = CreateWindow(L"BUTTON", L"", WS_VISIBLE | WS_CHILD | BS_BOTTOM | WS_CLIPCHILDREN | WS_CLIPSIBLINGS, 205, 0, 50, 25, Globals::var().hWndFather, (HMENU)123, Globals::var().hInst, NULL);
+	Globals::var().myButton[3] = CreateWindow(L"BUTTON", L"", WS_VISIBLE | WS_CHILD | BS_BOTTOM | WS_CLIPCHILDREN | WS_CLIPSIBLINGS, 260, 0, 50, 25, Globals::var().hWndFather, (HMENU)124, Globals::var().hInst, NULL);
+	Globals::var().myButton[4] = CreateWindow(L"BUTTON", L"", WS_VISIBLE | WS_CHILD | BS_BOTTOM | WS_CLIPCHILDREN | WS_CLIPSIBLINGS, 315, 0, 50, 25, Globals::var().hWndFather, (HMENU)125, Globals::var().hInst, NULL);
+	Globals::var().myButton[5] = CreateWindow(L"BUTTON", L"", WS_VISIBLE | WS_CHILD | BS_BOTTOM | WS_CLIPCHILDREN | WS_CLIPSIBLINGS, 370, 0, 50, 25, Globals::var().hWndFather, (HMENU)126, Globals::var().hInst, NULL);
 
 
     HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_WRITING1));

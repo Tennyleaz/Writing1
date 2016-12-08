@@ -3,7 +3,7 @@
 
 Globals::Globals()
 {
-	debugMode = true;
+	debugMode = false;
 }
 
 Globals & Globals::var()

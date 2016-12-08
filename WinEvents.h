@@ -16,10 +16,10 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
 
 void Clean(HWND hwnd);
 UINT SendWstring(int position, HWND hwnd);
-//void SetRecogConfig1();
 
-#define STDCALL __cdecl
-typedef DWORD (WINAPI *CreateServiceFunc)();
+//#define STDCALL __cdecl
+//here they use WINAPI instead of __cdecl
+typedef unsigned int (WINAPI *CreateServiceFunc)();
 typedef void (WINAPI *DestroyServiceFunc)(unsigned int dwServiceID);
 typedef void (WINAPI  *SetReturnHandle)(DWORD dwServiceID, HWND hWnd);
 typedef void (WINAPI *AddStrokes)(unsigned int dwServiceID, PTTYPE* pPts, int iCount);
@@ -27,4 +27,3 @@ typedef void (WINAPI *StartRecog)(unsigned int dwServiceID, PTTYPE* pPts, int iC
 typedef unsigned int (WINAPI *GetRecogResultJSON)(unsigned int dwServiceID, unsigned int dwResultID, char* szJSON, unsigned int l);
 typedef void (WINAPI *ClearStrokes)(unsigned int dwServiceID);
 typedef int (WINAPI * GetStrokeCount)(unsigned int dwServiceID);
-//typedef bool (WINAPI * SetRecogConfig)(unsigned int dwServiceID, RECOG_CONFIG recogConfig);

@@ -10,8 +10,6 @@
 using namespace std;
 using json = nlohmann::json;
 
-
-
 // These variables are required by BitBlt.
 static HDC hdcScreen;        // DC for entire screen
 static BITMAP bmp;           // bitmap data structure
@@ -32,9 +30,9 @@ static json J;
 static list<stroke> strokes;
 static stroke newStroke;
 static WCHAR candidates[6];
-//static HFONT buttonFont;
 static HPEN hpen;
 
+//the writing function pointers
 static CreateServiceFunc MyCreateService;
 static DestroyServiceFunc MyDestroyService;
 static SetReturnHandle MySetReturnHandle;
@@ -43,13 +41,11 @@ static StartRecog MyStartRecog;
 static GetRecogResultJSON MyGetResultJ;
 static ClearStrokes MyClearStrokes;
 static GetStrokeCount MyGetStrokeCount;
-//static SetRecogConfig MySetRecogConfig;
 
 LRESULT WM_CloseEvent(Parameter& param)
 {
-	DeleteObject(hpen);
+	DeleteObject(hpen);  //delete pen
 	Clean(param.hWnd_);
-	//DeleteObject(buttonFont);
 	MyClearStrokes(serviceID);
 	MyDestroyService(serviceID);
 	FreeLibrary(dllHandler);
@@ -114,37 +110,16 @@ LRESULT WM_CreateEvent(Parameter& param)
 		return -1;
 	}
 
-	/*MySetRecogConfig = (SetRecogConfig)GetProcAddress(dllHandler, "SetRecogConfig");
-	if (!MySetRecogConfig) {
-		MessageBox(NULL, TEXT("Cannot load function SetRecogConfig"), NULL, MB_OK);
-		return -1;
-	}*/
 
 	//init
 	serviceID = MyCreateService();
 	MySetReturnHandle(serviceID, param.hWnd_);
-	//SetRecogConfig1();
 
+	//set button text to \0
 	for (int i = 0; i < 6; i++)
 		candidates[i] = '\0';
 
-	/*//create my custom font
-	const TCHAR* fontName = _T("Croobie");
-	const long nFontSize = 10;
-
-	HDC hdc = GetDC(param.hWnd_);
-
-	LOGFONT logFont = { 0 };
-	logFont.lfHeight = -MulDiv(nFontSize, GetDeviceCaps(hdc, LOGPIXELSY), 72);
-	logFont.lfWeight = FW_BOLD;
-	_tcscpy_s(logFont.lfFaceName, fontName);
-	buttonFont = CreateFontIndirect(&logFont);
-	ReleaseDC(param.hWnd_, hdc);
-
-	//set the font
-	SendMessage(Globals::var().myButton[0], WM_SETFONT, (WPARAM)buttonFont, (LPARAM)MAKELONG(TRUE, 0));*/
-
-	//my pen
+	//create my pen
 	hpen = CreatePen(PS_SOLID, 2, RGB(0, 0, 0));	
 
 	// Create a normal DC and a memory DC for the entire 
@@ -157,8 +132,8 @@ LRESULT WM_CreateEvent(Parameter& param)
 	// regular device context.  bmp size=1920*1080
 	bmp.bmBitsPixel = (BYTE)GetDeviceCaps(hdcScreen, BITSPIXEL);
 	bmp.bmPlanes = (BYTE)GetDeviceCaps(hdcScreen, PLANES);
-	bmp.bmWidth = 2000;//GetDeviceCaps(hdcScreen, HORZRES);
-	bmp.bmHeight = 2000;//GetDeviceCaps(hdcScreen, VERTRES);
+	bmp.bmWidth = GetDeviceCaps(hdcScreen, HORZRES);
+	bmp.bmHeight = GetDeviceCaps(hdcScreen, VERTRES);
 
 	// The width must be byte-aligned. 
 	bmp.bmWidthBytes = ((bmp.bmWidth + 15) &~15) / 8;
@@ -216,7 +191,6 @@ LRESULT WM_PaintEvent(Parameter& param)
 	RECT clientRec = rect;
 	HDC hdc = BeginPaint(param.hWnd_, &ps);  //this will return display device id
 
-
 	GetClientRect(param.hWnd_, &clientRec);
 	HDC memoryDC = CreateCompatibleDC(hdc);
 	hBmp = CreateCompatibleBitmap(hdc, clientRec.right, clientRec.bottom);  // Create a bitmap big enough for our client rectangle.
@@ -230,6 +204,7 @@ LRESULT WM_PaintEvent(Parameter& param)
 	FillRect(memoryDC, &clientRec, hbrBkGnd);
 	DeleteObject(hbrBkGnd);
 
+	//do only once at window start
 	if (!isInit)
 	{
 		isInit = true;
@@ -238,8 +213,9 @@ LRESULT WM_PaintEvent(Parameter& param)
 		//this help when I click on buttons
 		int exstyle = GetWindowLong(param.hWnd_, GWL_EXSTYLE);
 		exstyle |= WS_EX_NOACTIVATE;
-		SetWindowLong(param.hWnd_, GWL_EXSTYLE, exstyle);		
+		SetWindowLong(param.hWnd_, GWL_EXSTYLE, exstyle);
 	}
+
 
 	// TODO: 在此加入任何使用 hdc 的繪圖程式碼...
 	//---------------------------------------------------------------
@@ -250,7 +226,7 @@ LRESULT WM_PaintEvent(Parameter& param)
 	//draw the newStroke
 	if (newStroke.points.size() > 0)
 	{
-		for (int i = 0; i < newStroke.points.size() - 1; i++)
+		for (int i = 0; i < newStroke.points.size() - 1; i++) //do not draw the last point (-1,-1)
 		{
 			if (!mouseHasDown && i == newStroke.points.size() - 2)
 				break;
@@ -265,7 +241,7 @@ LRESULT WM_PaintEvent(Parameter& param)
 	{
 		if (it.points.size() > 0)
 		{
-			for (int i = 0; i < it.points.size() - 1; i++)
+			for (int i = 0; i < it.points.size() - 1; i++)  
 			{
 				if (i == it.points.size() - 2)
 					break;
@@ -276,55 +252,9 @@ LRESULT WM_PaintEvent(Parameter& param)
 		}
 	}
 
-	if (Globals::var().debugMode)
+	if (Globals::var().debugMode)  //print debugging word candidate
 	{
-		//s2 = "mousex=" + to_string(mouseX) + " mousey=" + to_string(mouseY);
-		//TextOutA(memoryDC, 10 , 460 , s2.c_str(), s2.length());
-		//s2 = J.dump();
-		//TextOutA(memoryDC, 10, 520, s2.c_str(), s2.length());
-
-		/*json J2 = J["RecogResults"];
-		if (!J2.empty())
-		{
-			std::string s2 = J2.dump();
-
-			if(s2.size() > 2)
-				s2 = s2.substr(1, s2.size() - 2);  //去頭尾的 [ ] 符號
-
-			json J3 = json::parse(s2.c_str());
-
-			if (J3.size() <= 1)
-				goto JUMP_POINT;
-
-			int taskType = J3["taskType"];
-			if (taskType != 1)
-				goto JUMP_POINT;
-
-			if (!J3.empty())
-			{
-				json J4 = J3["word"];
-
-				if (!J4.empty())
-				{
-					int size = J4.size();
-
-					WCHAR * warray = new WCHAR[size];
-					for (int i = 0; i < size; i++)
-					{
-						//warray[i] = static_cast<WCHAR>(J4[i]);
-						warray[i] = candidates[i];
-					}
-					TextOut(memoryDC, 100, 100, warray, size);
-					TextOut(memoryDC, 55, 100, L"候選:", 3);
-				}
-			}
-		}
-		JUMP_POINT:*/
-
-		string s = "stroke count=" + to_string(strokeCount);
-		TextOutA(memoryDC, 10, 390, s.c_str(), s.size());
-
-		/*for (int i = 0; i < 6; i++)
+		for (int i = 0; i < 6; i++)
 		{
 			if(candidates[i] == '\0')
 				continue;
@@ -332,11 +262,15 @@ LRESULT WM_PaintEvent(Parameter& param)
 			WCHAR * warray = new WCHAR[2];
 			warray[0] = candidates[i];
 			warray[1] = '\0';
-			//wstring ws(warray);
 			TextOut(memoryDC, 100 + i*25, 100, warray, 1);
 			TextOut(memoryDC, 55, 100, L"候選:", 3);
-		}*/
+		}
 	}
+
+	string s = "stroke count=" + to_string(strokeCount);
+	TextOutA(memoryDC, 10, 390, s.c_str(), s.size());
+
+
 	//---------------------------------------------------------------
 	// Blt the changes to the screen DC.
 	BitBlt(hdc,
@@ -360,7 +294,7 @@ LRESULT WM_MouseMoveEvent(Parameter & param)
 
 	if (mouseHasDown)  //if mouse L is down
 	{
-		PTTYPE p(mouseX, mouseY);
+		PTTYPE p(mouseX, mouseY);  //add a new point to newStroke
 		newStroke.points.push_back(p);
 	}
 
@@ -379,7 +313,7 @@ LRESULT WM_LButtonDownEvent(Parameter & param)
 
 		mouseX = GET_X_LPARAM(param.lParam_);
 		mouseY = GET_Y_LPARAM(param.lParam_);
-		PTTYPE p(mouseX, mouseY);
+		PTTYPE p(mouseX, mouseY);  //this is the first point in newStroke
 		newStroke.points.push_back(p);
 	}
 	return 0;
@@ -394,22 +328,19 @@ LRESULT WM_LButtonUpEvent(Parameter & param)
 		InvalidateRect(param.hWnd_, NULL, FALSE);
 		mouseHasDown = false;
 
-		PTTYPE p(-1, -1);
+		PTTYPE p(-1, -1);  //add a (-1,-1) to the end of newStroke
 		newStroke.points.push_back(p);
 
-		//PTTYPE * pArray = &newStroke.points[0];
-		//MyStartRecog(serviceID, pArray, newStroke.points.size());
 		strokes.push_back(newStroke);
 
 		vector<PTTYPE> temp;
 		for (auto it : strokes)  //doing for every stroke
 		{
-			temp.insert(temp.end(), it.points.begin(), it.points.end());
+			temp.insert(temp.end(), it.points.begin(), it.points.end());  //dump all iterators into temp
 			PTTYPE * pArray = &it.points[0];
 			MyAddStrokes(serviceID, pArray, it.points.size());
 		}
-		//temp.push_back(PTTYPE(-2, -2));  //testing
-		//PTTYPE * pArray = &temp[0];
+
 		strokeCount = MyGetStrokeCount(serviceID);
 		MyStartRecog(serviceID, NULL, 0);
 	}
@@ -423,12 +354,9 @@ LRESULT WM_RecogComplete(Parameter & param)
 
 	char * result;
 	unsigned int length;
-	length = MyGetResultJ(serviceID, param.lParam_, NULL, 0);
+	length = MyGetResultJ(serviceID, param.lParam_, NULL, 0);  //get result length first
 	result = new char[length];
-	MyGetResultJ(serviceID, param.lParam_, result, length);
-	
-
-	//OutputDebugStringA(result);
+	MyGetResultJ(serviceID, param.lParam_, result, length);  //then get result into a buffer
 
 	J = json::parse(result);
 
@@ -440,13 +368,13 @@ LRESULT WM_RecogComplete(Parameter & param)
 	{
 		std::string s2 = J2.dump();
 		s2 = s2.substr(1, s2.size() - 2);  //去頭尾的 [ ] 符號
-		json J3 = json::parse(s2.c_str());
+		json J3 = json::parse(s2.c_str());  //get the "RecogResults" value string
 
 		if (J3.size() <= 1)
 			return false;
 
 		int taskType = J3["taskType"];
-		if (taskType != 1)
+		if (taskType != 1)  //don't continue if type != 1
 			return false;
 
 
@@ -456,24 +384,17 @@ LRESULT WM_RecogComplete(Parameter & param)
 		string s = "\nJ4=" + s2;
 		OutputDebugStringA(s.c_str());
 
-		//WCHAR * warray = new WCHAR[size];
 		for (int i = 0; i < size; i++)
 		{
 			WCHAR * warray = new WCHAR[2];
 			warray[0] = static_cast<WCHAR>(J4[i]);
-			/*switch (warray[0])
-			{
-			case '^':
-				warray[0] = '\^';
-				break;
-			}*/
 			candidates[i] = warray[0];
 			warray[1] = '\0';
 			wstring ws(warray);
-			SendMessage(Globals::var().myButton[i], WM_SETTEXT, 0, (LPARAM)ws.c_str());
+			SendMessage(Globals::var().myButton[i], WM_SETTEXT, 0, (LPARAM)ws.c_str());  //set the button text
 		}
 
-		if (size < 6)
+		if (size < 6)  //set the rest button to empty
 		{
 			for (int i = 6; i > size; i--)
 			{
@@ -482,9 +403,6 @@ LRESULT WM_RecogComplete(Parameter & param)
 			}
 		}
 	}
-
-	//MyDestroyService(serviceID);
-	//OutputDebugStringA("\MyDestroyService is called\n");
 
 	return true;
 }
@@ -526,7 +444,7 @@ void Clean(HWND hwnd)
 	}
 	strokes.clear();
 	J.clear();
-	for (int i = 0; i < 6; i++)
+	for (int i = 0; i < 6; i++)  //set each button to empty
 	{
 		SendMessage(Globals::var().myButton[i], WM_SETTEXT, 0, (LPARAM)L"");
 		candidates[i] = '\0';
@@ -535,6 +453,7 @@ void Clean(HWND hwnd)
 	InvalidateRect(hwnd, NULL, FALSE);
 }
 
+//send a wstring to given button
 UINT SendWstring(int position, HWND hwnd)
 {
 	if (candidates[position] == '\0')
@@ -556,7 +475,7 @@ UINT SendWstring(int position, HWND hwnd)
 		// Loop through each Unicode character in the string.
 		for (auto c : ws)
 		{
-			// First send a key down, then a key up.
+			// First send a key down (keyUp=false), then a key up (keyUp=true).
 			bool bools[2] = { false, true };
 			for (bool keyUp : bools)
 			{
@@ -565,7 +484,7 @@ UINT SendWstring(int position, HWND hwnd)
 				INPUT input;
 				input.type = INPUT_KEYBOARD;
 				input.ki.wVk = 0;
-				input.ki.wScan = c;
+				input.ki.wScan = c;  //set the input char
 				input.ki.dwFlags = KEYEVENTF_UNICODE | (keyUp ? KEYEVENTF_KEYUP : 0);
 				input.ki.dwExtraInfo = GetMessageExtraInfo();
 
@@ -584,51 +503,3 @@ UINT SendWstring(int position, HWND hwnd)
 
 	return 0;
 }
-
-/*void SetRecogConfig1()
-{
-	RECOG_CONFIG recogConfig;
-	recogConfig.AI_Path[0] = 0;
-	recogConfig.AI_Multi_Path[0] = 0;
-	recogConfig.Learn_Str_Path[0] = 0;
-	recogConfig.User_Supplement_Path[0] = 0;
-	
-	recogConfig.ResolutionWidth = 600;
-	recogConfig.ResolutionHeight = 500;
-
-	recogConfig.PrevChar = 0;
-	recogConfig.recogEngine = 0;
-
-	recogConfig.MultiRecog = false;
-
-	recogConfig.CandidateNum = 9;
-
-
-	//public Int32 MyaTable;
-
-	//RecogType
-	recogConfig.ChineseCommon = false;
-
-	//recogConfig.ChineseRare; //256;
-	recogConfig.EnglishUpperAlpha = true;   //2;
-	recogConfig.EnglishLowerAlpha = true;   //4;
-	recogConfig.JapaneseKatakana = false;    //8;
-	recogConfig.JapaneseHiragana = false;    //16;
-											 //recogConfig.Numerics = true;    //32;
-											 //recogConfig.Symbols = true; //64;
-	recogConfig.Gestures = true;    //128;
-	recogConfig.KoreaCommon = false; //2048;
-	recogConfig.KoreaRare = false;   //4096;
-									 //recogConfig.recogType;
-
-									 //ShapeMode
-	recogConfig.UseHalfShape = 0;
-	recogConfig.TurnOnHK = false;
-	recogConfig.TurnOnFullUnicode = false;
-	//recogConfig.TurnOnBig5Only = false;
-	//recogConfig.TurnOnGBOnly = false;
-	//recogConfig.TurnOnGBBOnly = false;
-	recogConfig.TurnOnRunning = false;
-
-	//MySetRecogConfig(serviceID, recogConfig);
-}*/

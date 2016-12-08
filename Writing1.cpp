@@ -14,7 +14,7 @@ HINSTANCE hInst;                                // 目前執行個體
 WCHAR szTitle[MAX_LOADSTRING];                  // 標題列文字
 WCHAR szWindowClass[MAX_LOADSTRING];            // 主視窗類別名稱
 
-UINT NSRC;
+
 
 // 這個程式碼模組中所包含之函式的向前宣告: 
 ATOM                MyRegisterClass(HINSTANCE hInstance);
@@ -31,7 +31,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     UNREFERENCED_PARAMETER(lpCmdLine);
 
     // TODO: 在此置入程式碼。
-	NSRC = RegisterWindowMessage(L"NOTIFY_SINGLE_RECOG_COMPLETE");
+
+	//register the widsows message NOTIFY_SINGLE_RECOG_COMPLETE
+	UINT NSRC = RegisterWindowMessage(L"NOTIFY_SINGLE_RECOG_COMPLETE");
 
 	Listener::WinProcMsgListener().hInst = hInstance;
 	Listener::WinProcMsgListener().AddEvent(WM_CLOSE, WM_CloseEvent);
@@ -55,6 +57,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         return FALSE;
     }
 
+	//create control buttons
 	Globals::var().clearButton = CreateWindow(L"BUTTON", L"Clean", WS_VISIBLE | WS_CHILD | BS_BOTTOM | WS_CLIPCHILDREN | WS_CLIPSIBLINGS, 5, 0, 80, 25, Globals::var().hWndFather, (HMENU)120, Globals::var().hInst, NULL);
 
 	Globals::var().myButton[0] = CreateWindow(L"BUTTON", L" ", WS_VISIBLE | WS_CHILD | BS_BOTTOM | WS_CLIPCHILDREN | WS_CLIPSIBLINGS, 95, 0, 50, 25, Globals::var().hWndFather, (HMENU)121, Globals::var().hInst, NULL);
@@ -150,40 +153,6 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 //
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-    /*switch (message)
-    {
-    case WM_COMMAND:
-        {
-            int wmId = LOWORD(wParam);
-            // 剖析功能表選取項目: 
-            switch (wmId)
-            {
-            case IDM_ABOUT:
-                DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
-                break;
-            case IDM_EXIT:
-                DestroyWindow(hWnd);
-                break;
-            default:
-                return DefWindowProc(hWnd, message, wParam, lParam);
-            }
-        }
-        break;
-    case WM_PAINT:
-        {
-            PAINTSTRUCT ps;
-            HDC hdc = BeginPaint(hWnd, &ps);
-            // TODO: 在此加入任何使用 hdc 的繪圖程式碼...
-            EndPaint(hWnd, &ps);
-        }
-        break;
-    case WM_DESTROY:
-        PostQuitMessage(0);
-        break;
-    default:
-        return DefWindowProc(hWnd, message, wParam, lParam);
-    }
-    return 0;*/
 	return Listener::WinProcMsgListener().Trig(message, Parameter(hWnd, message, wParam, lParam));
 }
 
